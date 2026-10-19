@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: android-actions/setup-java@v4
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -24,13 +24,18 @@ jobs:
           yes | sdkmanager --licenses
           sdkmanager "build-tools;34.0.0" "platforms;android-34"
 
-      - name: Prepare config & Run build
+      - name: Prepare config and build
         run: |
           chmod +x build.sh
-          ./build.sh || true
+          # Tworzymy config.properties, aby skrypt nie wymagał interakcji
+          if [ -f config.example.properties ]; then
+            cp config.example.properties config.properties
+          else
+            touch config.properties
+          fi
           ./build.sh
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: FreeMyTV-APK
