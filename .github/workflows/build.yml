@@ -16,18 +16,17 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android build tools
+      - name: Install Android Build Tools
         run: |
-          yes | sdkmanager --licenses
-          sdkmanager "build-tools;34.0.0" "platforms;android-34"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0" "platforms;android-34"
 
       - name: Prepare config and build
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
         run: |
+          export PATH="$ANDROID_HOME/build-tools/34.0.0:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
           chmod +x build.sh
-          # Tworzymy config.properties, aby skrypt nie wymagał interakcji
           if [ -f config.example.properties ]; then
             cp config.example.properties config.properties
           else
