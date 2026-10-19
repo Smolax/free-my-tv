@@ -27,11 +27,17 @@ jobs:
         run: |
           export PATH="$ANDROID_HOME/build-tools/34.0.0:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
           chmod +x build.sh
-          if [ -f config.example.properties ]; then
-            cp config.example.properties config.properties
-          else
-            touch config.properties
+          
+          # Jeśli plik config.properties nie istnieje, stwórz go z szablonu.
+          # Jeśli już go dodałeś, ten krok nie nadpisze Twoich danych.
+          if [ ! -f config.properties ]; then
+            if [ -f config.example.properties ]; then
+              cp config.example.properties config.properties
+            else
+              touch config.properties
+            fi
           fi
+          
           ./build.sh
 
       - name: Upload APK
