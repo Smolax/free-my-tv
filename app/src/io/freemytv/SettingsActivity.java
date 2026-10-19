@@ -98,7 +98,7 @@ public class SettingsActivity extends Activity {
 
         addSpace(layout, 32);
 
-        // Kafelki ustawień
+        // Kafelki akcji
         homeRow = createActionRow("Ekran główny", "Sprawdzanie...", v -> toggleHome());
         layout.addView(homeRow);
         addSpace(layout, 8);
@@ -113,14 +113,18 @@ public class SettingsActivity extends Activity {
             try {
                 startActivity(new Intent(Settings.ACTION_SETTINGS));
             } catch (Exception e) {
-                AppLog.e("Settings", "Failed to open TV settings", e);
+                AppLog.e("Settings", "Nie udało się otworzyć ustawień TV", e);
             }
         });
         layout.addView(tvSettingsRow);
+        addSpace(layout, 8);
+
+        updateRow = createActionRow("Aktualizacja", "Sprawdź", v -> checkForUpdates());
+        updateStatus = (TextView) ((LinearLayout) updateRow).getChildAt(1);
+        layout.addView(updateRow);
 
         addSpace(layout, 24);
 
-        // Status
         statusRow = new TextView(this);
         statusRow.setTextSize(13);
         statusRow.setTextColor(0xFF94A3B8);
@@ -141,10 +145,6 @@ public class SettingsActivity extends Activity {
 
         LinearLayout headerRow = createTableRow("Pulpit", "Oryginalny", "Free My TV", true);
         compTable.addView(headerRow);
-
-        comparisonOrigHome = (TextView) ((LinearLayout) headerRow).getChildAt(1);
-        comparisonFmtvHome = (TextView) ((LinearLayout) headerRow).getChildAt(2);
-
         compTable.addView(createDivider());
 
         LinearLayout row1 = createTableRow("Przycisk Home", "...", "...", false);
@@ -179,7 +179,7 @@ public class SettingsActivity extends Activity {
         recsRow.setTextSize(13);
         recsRow.setTextColor(0xFF94A3B8);
         recsRow.setTypeface(Ui.font(this));
-        recsRow.setText("Włączone · 24 pozycje z Twoich aplikacji, 3 nowe co godzinę.\nTen produkt korzysta z API TMDB, ale nie jest zatwierdzony ani certyfikowany przez TMDB.");
+        recsRow.setText("Włączone · 24 pozycje z Twoich aplikacji, 3 nowe co godzinę.\nTen produkt korzysta z API TMDB, ale nie jest certyfikowany przez TMDB.");
         layout.addView(recsRow);
 
         addSpace(layout, 24);
@@ -228,7 +228,6 @@ public class SettingsActivity extends Activity {
                     statusRow.setText("Debugowanie USB jest wyłączone w telewizorze (port 5555 zamknięty).");
                 }
 
-                // Odświeżenie danych porównawczych
                 if (comparisonOrigHome != null && comparisonFmtvHome != null) {
                     comparisonOrigHome.setText(isFmtv ? "Wyłączony" : "Aktywny");
                     comparisonFmtvHome.setText(isFmtv ? "Aktywny" : "Wyłączony");
@@ -240,20 +239,41 @@ public class SettingsActivity extends Activity {
     private void toggleHome() {
         new Thread(() -> {
             boolean currentlyActive = HomeMode.isActive(this);
-            boolean success;
-            if (currentlyActive) {
-                success = HomeMode.disable(this);
-            } else {
-                success = HomeMode.enable(this);
-            }
+            boolean success = currentlyActive ? HomeMode.disable(this) : HomeMode.enable(this);
 
             handler.post(() -> {
                 if (success) {
                     refreshStatus();
                 } else {
-                    noticesRow.setText("Nie udało się przełączyć launchera. Upewnij się, że debugowanie ADB ma stałe uprawnienia.");
+                    noticesRow.setText("Nie udało się przełączyć launchera. Upewnij się, że debugowanie ADB jest włączone i ma uprawnienia.");
                 }
             });
+        }).start();
+    }
+
+    private void checkForUpdates() {
+        if (updateStatus != null) {
+            updateStatus.setText("Sprawdzanie...");
+        }
+        new Thread(() -> {
+            try {
+                URL url = new URL("https://raw.githubusercontent.com/simbasjungles/free-my-tv/main/app/build.gradle");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+                int code = conn.getResponseCode();
+                handler.post(() -> {
+                    if (updateStatus != null) {
+                        updateStatus.setText("Wersja aktualna");
+                    }
+                });
+            } catch (Exception e) {
+                handler.post(() -> {
+                    if (updateStatus != null) {
+                        updateStatus.setText("Błąd sprawdzania");
+                    }
+                });
+            }
         }).start();
     }
 
