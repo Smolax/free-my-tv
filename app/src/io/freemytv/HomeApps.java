@@ -80,7 +80,7 @@ final class HomeApps {
      */
     private static final String[][] SHELF = {
         {"netflix", "Netflix", "com.netflix.ninja", "E50914", "", "1"},
-        {"youtube", "YouTube", "com.google.android.youtube.tv", "FF0033", "play", "1"},
+        {"youtube", "YouTube", "com.google.android.youtube.tv", "15161C", "play", "1"},
         {"prime", "Prime Video", "com.amazon.amazonvideo.livingroom", "1A98FF", "tint", "0.96"},
         {"disney", "Disney+", "com.disney.disneyplus", "1838C8", "", "1"},
         {"max", "Max", "com.wbd.stream", "6C3BE0", "", "1.32"},
@@ -474,9 +474,9 @@ final class HomeApps {
                 for (int i = 0; i < 3; i++) col[i] = clamp((col[i] - (1 - a) * bg[i]) / a);   // no background halo
                 float l = lum(col), s = sat(col);
                 if (bgLum > 0.6f && l < 0.42f && s < 0.3f) {
-                    col[0] = col[1] = col[2] = 1f;                  // black text on a light background → white
+                    col[0] = col[1] = col[2] = 1f;                                  // black text on a light background → white
                 } else if (tint && bgLum <= 0.6f && bgLum > 0.1f && bgSat > 0.35f && l > 0.7f && s < 0.25f) {
-                    vivid(bg, col);                                 // white logo on brand color → that color, vivid
+                    vivid(bg, col);                                                 // white logo on brand color → that color, vivid
                 }
                 out[y * w + x] = (Math.round(a * 255) << 24) | (Math.round(col[0] * 255) << 16) | (Math.round(col[1] * 255) << 8) | Math.round(col[2] * 255);
                 if (a > 0.5f) opaque++;
@@ -654,7 +654,7 @@ final class HomeApps {
         if (d == null) return null;
         Bitmap b = Bitmap.createBitmap(TILE_W, TILE_H, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(b);
-        canvas.drawColor(0xFF15161C);   // banners with transparency sit on a dark background
+        canvas.drawColor(0xFF15161C);
         d.setBounds(0, 0, TILE_W, TILE_H);
         d.draw(canvas);
         return b;
